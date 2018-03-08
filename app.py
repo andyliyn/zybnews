@@ -4,6 +4,8 @@ import urllib2
 import re
 import os
 from bs4 import BeautifulSoup
+
+
  
 def extract_url(info):     
      soup=BeautifulSoup(info,"html.parser")
@@ -39,39 +41,71 @@ def filter_tags(htmlstr):
      return s
 
 def explore_access(web_url):
-    web_url=urlStr.replace('pgNum',str(k))
+    #web_url=urlStr.replace('pgNum',str(k))
     request = urllib2.Request(web_url) 
     request.add_header('User-Agent','Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6')  
     opener = urllib2.build_opener()  
     html= opener.open(request).read()
     return html
 
-#generate file
-f = file('result.txt','w')
-urlStr='http://weixin.sogou.com/weixin?query=keyword&_sug_type_=&s_from=input&_sug_=n&type=2&page=pgNum&ie=utf8'
-keyword='互联网营销'
-urlStr=urlStr.replace('keyword',keyword)
-for k in range(1,6):
-    
-    web_url=urlStr.replace('pgNum',str(k))
-    
-    #get news
-    #content = urllib2.urlopen(url).read()
-    content = explore_access(web_url)
-    print content
-    #get the url
-    get_url = extract_url(content)
-    num=len(get_url)
-    for i in range(num):
-        item=get_url[i].find('a')
-        title=item.renderContents()
-        title=title.decode('utf-8', 'ignore')
-        link=item.get("href")
-        print 'title====',title,'--- link is   ',link
-        if title  and link:
-            re_content = filter_tags(title+"\r"+link)
-            f.write(re_content.encode("utf-8"))
-            f.write("\r\n")
+#网页搜索
+def extract_web_content(keyword):
+    f = file('result.txt','w')
+    urlStr='http://weixin.sogou.com/weixin?query=keyword&_sug_type_=&s_from=input&_sug_=n&type=2&page=pgNum&ie=utf8'
+    #keyword='互联网营销'
+    urlStr=urlStr.replace('keyword',keyword)
+    for k in range(1,3):
+        web_url=urlStr.replace('pgNum',str(k))    
+        #get news
+        #content = urllib2.urlopen(url).read()
+        content = explore_access(web_url)
+        #print content
+        #get the url
+        get_url = extract_url(content)
+        num=len(get_url)
+        for i in range(num):
+            item=get_url[i].find('a')
+            title=item.renderContents()
+            title=title.decode('utf-8', 'ignore')
+            link=item.get("href")
+            print 'title====',title,'--- link is   ',link
+            if title  and link:
+                re_content = filter_tags(title+"\r"+link)
+                f.write(re_content.encode("utf-8"))
+                f.write("\r\n")
 
-#print 'get_url-----',get_url
-f.close()
+    #print 'get_url-----',get_url
+    f.close()
+
+#通过微信搜狗从指定公众号查询关键字内容
+def extract_web_content_weixin_account(wxid,keyword,fileName):
+    f = file(fileName,'w')
+    urlStr='http://weixin.sogou.com/weixin?type=2&ie=utf8&query=keyword&tsn=1&ft=&et=&interation=&wxid=targetWXID'
+    urlStr=urlStr.replace('keyword',keyword)
+    urlStr=urlStr.replace('targetWXID',wxid)
+    for k in range(1,3):    
+        print k
+        web_url=urlStr.replace('pgNum',str(k))
+        print 'web_url======================'
+        print  web_url
+        #get news
+        #content = urllib2.urlopen(url).read()
+        content = explore_access(web_url)
+        #print content
+        #get the url
+        get_url = extract_url(content)
+        num=len(get_url)
+        for i in range(num):
+            item=get_url[i].find('a')
+            title=item.renderContents()
+            title=title.decode('utf-8', 'ignore')
+            link=item.get("href")
+            print 'title====',title,'--- link is   ',link
+            if title  and link:
+                re_content = filter_tags(title+"\r"+link)
+                f.write(re_content.encode("utf-8"))
+                f.write("\r\n")
+    f.close()
+    
+extract_web_content_weixin_account('oIWsFt4koTaqSmZj2AE_27JLuLjA','健康','health.txt')
+    
