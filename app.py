@@ -5,7 +5,30 @@ import re
 import os
 from bs4 import BeautifulSoup
 
+#init header  
+header = {  
+    'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',  
+    'Accept-Encoding':'gzip, deflate',  
+    'Accept-Language':'zh-CN,zh;q=0.9',  
+    'Connection':'keep-alive',  
+    'Host':'weixin.sogou.com',  
+    'Upgrade-Insecure-Requests':'1',  
+    'User-Agent':'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36',  
+    } 
 
+#get cookie  
+def get_cookies():  
+    driver = webdriver.Chrome()  
+    driver.get("http://weixin.sogou.com/")  
+  
+    driver.find_element_by_xpath('//*[@id="loginBtn"]').click()  
+    time.sleep(10)  
+  
+    cookies = driver.get_cookies()  
+    cookie = {}  
+    for items in cookies:  
+        cookie[items.get('name')] = items.get('value')  
+    return cookie
  
 def extract_url(info):     
      soup=BeautifulSoup(info,"html.parser")
@@ -80,10 +103,11 @@ def extract_web_content(keyword):
 #通过微信搜狗从指定公众号查询关键字内容
 def extract_web_content_weixin_account(wxid,keyword,fileName):
     f = file(fileName,'w')
-    urlStr='http://weixin.sogou.com/weixin?type=2&ie=utf8&query=keyword&tsn=1&ft=&et=&interation=&wxid=targetWXID'
+    urlStr='http://weixin.sogou.com/weixin?type=2&ie=utf8&query=keyword&tsn=1&ft=&et=&interation=&wxid=targetWXID&usip=101.80.92.79'
     urlStr=urlStr.replace('keyword',keyword)
     urlStr=urlStr.replace('targetWXID',wxid)
-    for k in range(1,3):    
+    print urlStr
+    for k in range(1,2):    
         print k
         web_url=urlStr.replace('pgNum',str(k))
         print 'web_url======================'
@@ -107,5 +131,5 @@ def extract_web_content_weixin_account(wxid,keyword,fileName):
                 f.write("\r\n")
     f.close()
     
-extract_web_content_weixin_account('oIWsFt4koTaqSmZj2AE_27JLuLjA','健康','health.txt')
+extract_web_content_weixin_account('oIWsFt8_jYUmdw1PQgNVhH9vOEvI','health','health.txt')
     
